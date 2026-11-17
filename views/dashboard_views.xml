@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Interactive OWL Dashboard Client Action -->
+    <record id="action_helpdeskpro_dashboard" model="ir.actions.client">
+        <field name="name">HelpDeskPro Dashboard</field>
+        <field name="tag">helpdeskpro_dashboard</field>
+    </record>
+
+    <!-- ========================================================== -->
+    <!-- 2. ANALYTICS & MANAGEMENT REPORTS ACTIONS                  -->
+    <!-- ========================================================== -->
+    <!-- A. Ticket Summary & Resolution Report -->
+    <record id="action_report_ticket_summary_analysis" model="ir.actions.act_window">
+        <field name="name">Ticket Summary &amp; Resolution Analysis</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="context">{
+            'search_default_group_state': 1,
+            'pivot_measures': ['response_hours', 'resolution_hours', '__count']
+        }</field>
+    </record>
+
+    <!-- B. Agent Performance Report -->
+    <record id="action_report_agent_performance" model="ir.actions.act_window">
+        <field name="name">Agent Performance &amp; Workload Analysis</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="context">{
+            'search_default_group_agent': 1,
+            'search_default_group_state': 1,
+            'pivot_measures': ['response_hours', 'resolution_hours', 'csat_score', '__count']
+        }</field>
+    </record>
+
+    <!-- C. Team Performance Report -->
+    <record id="action_report_team_performance" model="ir.actions.act_window">
+        <field name="name">Team Performance Analysis</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="context">{
+            'search_default_group_team': 1,
+            'search_default_group_state': 1,
+            'pivot_measures': ['resolution_hours', 'csat_score', '__count']
+        }</field>
+    </record>
+
+    <!-- D. SLA Compliance Report -->
+    <record id="action_report_sla_compliance" model="ir.actions.act_window">
+        <field name="name">SLA Compliance Analysis</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="domain">[('sla_id', '!=', False)]</field>
+        <field name="context">{
+            'search_default_group_sla_status': 1,
+            'search_default_group_team': 1
+        }</field>
+    </record>
+
+    <!-- E. Priority & CSAT Distribution Report -->
+    <record id="action_report_priority_csat" model="ir.actions.act_window">
+        <field name="name">Priority &amp; CSAT Distribution</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="context">{
+            'search_default_group_priority': 1,
+            'pivot_measures': ['csat_score', 'resolution_hours', '__count']
+        }</field>
+    </record>
+
+    <!-- F. Customer Ticket History Report -->
+    <record id="action_report_customer_history" model="ir.actions.act_window">
+        <field name="name">Customer Ticket History</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">pivot,graph,list,form</field>
+        <field name="context">{
+            'search_default_group_customer': 1,
+            'search_default_group_state': 1
+        }</field>
+    </record>
+</odoo>

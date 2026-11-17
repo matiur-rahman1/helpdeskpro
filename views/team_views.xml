@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_helpdesk_team_search" model="ir.ui.view">
+        <field name="name">helpdesk.team.search</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <search string="Support Teams">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="leader_id"/>
+                <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter name="group_leader" string="Team Leader" context="{'group_by': 'leader_id'}"/>
+                    <filter name="group_method" string="Assignment Mode" context="{'group_by': 'assignment_method'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_team_kanban" model="ir.ui.view">
+        <field name="name">helpdesk.team.kanban</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard hdp-team-kanban">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="leader_id"/>
+                <field name="member_count"/>
+                <field name="ticket_count"/>
+                <field name="open_ticket_count"/>
+                <field name="unassigned_ticket_count"/>
+                <field name="resolved_ticket_count"/>
+                <field name="overdue_ticket_count"/>
+                <field name="sla_compliance_rate"/>
+                <field name="avg_resolution_hours"/>
+                <field name="assignment_method"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="hdp-team-card p-3">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h4 class="mb-0 fw-bold text-dark"><field name="name"/></h4>
+                                    <span class="text-muted small" t-if="record.leader_id.raw_value">
+                                        <i class="fa fa-user-md me-1" title="Team Leader"/>Lead: <field name="leader_id"/>
+                                    </span>
+                                </div>
+                                <span class="badge rounded-pill text-bg-primary">
+                                    <field name="member_count"/> Agents
+                                </span>
+                            </div>
+
+                            <div class="row g-2 my-2 text-center">
+                                <div class="col-4">
+                                    <div class="p-2 rounded bg-light border">
+                                        <div class="fs-5 fw-bold text-primary"><field name="open_ticket_count"/></div>
+                                        <div class="small text-muted">Active</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2 rounded bg-light border">
+                                        <div class="fs-5 fw-bold text-success"><field name="resolved_ticket_count"/></div>
+                                        <div class="small text-muted">Resolved</div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="p-2 rounded bg-light border">
+                                        <div class="fs-5 fw-bold text-danger"><field name="overdue_ticket_count"/></div>
+                                        <div class="small text-muted">Overdue</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center small text-muted mt-2 pt-2 border-top">
+                                <span><i class="fa fa-shield me-1" title="SLA Compliance"/>SLA: <b><field name="sla_compliance_rate"/>%</b></span>
+                                <span><i class="fa fa-clock-o me-1" title="Avg Resolution"/>Avg: <b><field name="avg_resolution_hours"/>h</b></span>
+                            </div>
+
+                            <div class="d-flex gap-2 mt-3">
+                                <button name="action_view_open_tickets" type="object" class="btn btn-sm btn-primary flex-grow-1">
+                                    Active Tickets
+                                </button>
+                                <button name="action_view_tickets" type="object" class="btn btn-sm btn-outline-secondary">
+                                    All (<field name="ticket_count"/>)
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_team_list" model="ir.ui.view">
+        <field name="name">helpdesk.team.list</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <list string="Support Teams">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="leader_id" widget="many2one_avatar_user"/>
+                <field name="member_count" string="Agents"/>
+                <field name="assignment_method" widget="badge" decoration-info="assignment_method == 'balanced'"/>
+                <field name="open_ticket_count" string="Active"/>
+                <field name="resolved_ticket_count" string="Resolved"/>
+                <field name="overdue_ticket_count" string="Overdue" decoration-danger="overdue_ticket_count &gt; 0"/>
+                <field name="sla_compliance_rate" string="SLA %"/>
+                <field name="avg_resolution_hours" string="Avg Res (h)"/>
+                <field name="company_id" groups="base.group_multi_company" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_team_form" model="ir.ui.view">
+        <field name="name">helpdesk.team.form</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <form string="Support Team">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_open_tickets" icon="fa-life-ring">
+                            <field string="Active Tickets" name="open_ticket_count" widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_view_tickets" icon="fa-ticket">
+                            <field string="Total Tickets" name="ticket_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Tier 2 Technical Support"/></h1>
+                    </div>
+                    <group>
+                        <group string="Team Configuration">
+                            <field name="code" placeholder="TECH"/>
+                            <field name="leader_id" widget="many2one_avatar_user"/>
+                            <field name="email" widget="email"/>
+                            <field name="assignment_method"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Performance Metrics">
+                            <field name="sla_compliance_rate" readonly="1"/>
+                            <field name="avg_resolution_hours" readonly="1"/>
+                            <field name="overdue_ticket_count" readonly="1"/>
+                            <field name="csat_avg" readonly="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Team Members (Agents)" name="members">
+                            <field name="member_ids" widget="many2many">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="login"/>
+                                    <field name="email"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Description" name="description">
+                            <field name="description" placeholder="Describe the team's responsibilities and escalation scope..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_helpdesk_team" model="ir.actions.act_window">
+        <field name="name">Support Teams</field>
+        <field name="res_model">helpdesk.team</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="search_view_id" ref="view_helpdesk_team_search"/>
+    </record>
+</odoo>

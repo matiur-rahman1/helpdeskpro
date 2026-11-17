@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Add Support Tickets Entry to /my Portal Home -->
+    <template id="portal_my_home_helpdeskpro" name="Portal My Home: HelpDeskPro Tickets"
+              inherit_id="portal.portal_my_home" priority="25">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <div id="portal_client_category" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="icon" t-value="'/web/static/img/placeholder.png'"/>
+                <t t-set="title">Support Tickets</t>
+                <t t-set="url" t-value="'/my/tickets'"/>
+                <t t-set="text">Submit support requests, track SLA progress, and view resolutions</t>
+                <t t-set="placeholder_count" t-value="'ticket_count'"/>
+            </t>
+        </div>
+    </template>
+
+    <!-- 2. Portal Ticket List (/my/tickets) -->
+    <template id="portal_my_tickets" name="My Support Tickets">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+
+            <div class="container py-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 p-4 rounded-3 mb-4"
+                     style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color: #FFFFFF;">
+                    <div>
+                        <h2 class="h4 mb-1 fw-bold text-white">
+                            <i class="fa fa-life-ring me-2" title="Support"/>My Support Tickets
+                        </h2>
+                        <div class="small" style="color: #94A3B8;">
+                            Track your support inquiries, view resolutions, and communicate with our engineering team.
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/helpdesk/knowledge" class="btn btn-outline-light btn-sm">
+                            <i class="fa fa-book me-1" title="Knowledge Base"/>Knowledge Base &amp; FAQ
+                        </a>
+                        <a href="/my/tickets/new" class="btn btn-primary btn-sm" style="background-color: #2563EB; border-color: #2563EB;">
+                            <i class="fa fa-plus me-1" title="New Ticket"/>Submit New Ticket
+                        </a>
+                    </div>
+                </div>
+
+                <div t-if="error" class="alert alert-danger" role="alert">
+                    <i class="fa fa-exclamation-triangle me-2" title="Error"/><t t-out="error"/>
+                </div>
+                <div t-if="success" class="alert alert-success" role="alert">
+                    <i class="fa fa-check-circle me-2" title="Success"/>Your request was processed successfully.
+                </div>
+
+                <!-- Filter & Search Bar -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <a t-attf-href="/my/tickets?filterby=all" t-attf-class="btn #{filterby == 'all' and 'btn-dark' or 'btn-outline-secondary'}">All</a>
+                        <a t-attf-href="/my/tickets?filterby=open" t-attf-class="btn #{filterby == 'open' and 'btn-dark' or 'btn-outline-secondary'}">Open</a>
+                        <a t-attf-href="/my/tickets?filterby=resolved" t-attf-class="btn #{filterby == 'resolved' and 'btn-dark' or 'btn-outline-secondary'}">Resolved</a>
+                        <a t-attf-href="/my/tickets?filterby=closed" t-attf-class="btn #{filterby == 'closed' and 'btn-dark' or 'btn-outline-secondary'}">Closed</a>
+                    </div>
+                    <form action="/my/tickets" method="GET" class="d-flex gap-2">
+                        <input type="hidden" name="filterby" t-att-value="filterby"/>
+                        <input type="search" name="search" class="form-control form-control-sm" placeholder="Search ticket # or subject..." t-att-value="search"/>
+                        <button type="submit" class="btn btn-sm btn-secondary">Search</button>
+                    </form>
+                </div>
+
+                <div t-if="not tickets" class="card border-0 shadow-sm p-5 text-center">
+                    <div class="text-muted mb-3">
+                        <i class="fa fa-ticket fa-3x mb-2 text-secondary" title="No Tickets"/>
+                        <h5>No support tickets found</h5>
+                        <p class="small mb-0">Need help? Submit a new ticket and our team will respond promptly.</p>
+                    </div>
+                    <div>
+                        <a href="/my/tickets/new" class="btn btn-primary btn-sm">Submit a Support Ticket</a>
+                    </div>
+                </div>
+
+                <div t-else="" class="card border-0 shadow-sm overflow-hidden">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead style="background-color: #F8FAFC;">
+                                <tr>
+                                    <th>Ticket #</th>
+                                    <th>Subject</th>
+                                    <th>Category</th>
+                                    <th>Priority</th>
+                                    <th>Created</th>
+                                    <th>Status</th>
+                                    <th class="text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="tickets" t-as="t">
+                                    <tr>
+                                        <td class="fw-bold">
+                                            <a t-attf-href="/my/tickets/#{t.id}" class="text-decoration-none" style="color: #2563EB;">
+                                                <t t-out="t.name"/>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a t-attf-href="/my/tickets/#{t.id}" class="text-dark fw-semibold text-decoration-none">
+                                                <t t-out="t.subject"/>
+                                            </a>
+                                        </td>
+                                        <td><span class="text-muted small"><t t-out="t.category_id.name or 'General'"/></span></td>
+                                        <td>
+                                            <span t-if="t.priority == '3'" class="badge text-bg-danger">Urgent</span>
+                                            <span t-elif="t.priority == '2'" class="badge text-bg-warning">High</span>
+                                            <span t-elif="t.priority == '1'" class="badge text-bg-primary">Medium</span>
+                                            <span t-else="" class="badge text-bg-secondary">Low</span>
+                                        </td>
+                                        <td class="small text-muted">
+                                            <span t-field="t.create_date" t-options="{'widget': 'date'}"/>
+                                        </td>
+                                        <td>
+                                            <span t-if="t.state in ('resolved', 'closed')" class="badge text-bg-success">
+                                                <t t-out="dict(t._fields['state'].selection).get(t.state)"/>
+                                            </span>
+                                            <span t-elif="t.state == 'cancelled'" class="badge text-bg-secondary">Cancelled</span>
+                                            <span t-else="" class="badge text-bg-info">
+                                                <t t-out="dict(t._fields['state'].selection).get(t.state)"/>
+                                            </span>
+                                        </td>
+                                        <td class="text-end">
+                                            <a t-attf-href="/my/tickets/#{t.id}" class="btn btn-sm btn-outline-primary">View</a>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div t-if="pager" class="o_portal_pager d-flex justify-content-center my-3">
+                    <t t-call="portal.pager"/>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- 3. Portal Create Ticket Page (/my/tickets/new) with Live Suggested KB Articles -->
+    <template id="portal_create_ticket" name="Submit a Support Ticket">
+        <t t-call="portal.portal_layout">
+            <div class="container py-4">
+                <div class="mb-3">
+                    <a href="/my/tickets" class="text-decoration-none small">
+                        <i class="fa fa-arrow-left me-1" title="Back"/>Back to My Tickets
+                    </a>
+                </div>
+
+                <div t-if="error" class="alert alert-danger" role="alert">
+                    <i class="fa fa-exclamation-triangle me-2" title="Error"/><t t-out="error"/>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm p-4">
+                            <h3 class="h5 fw-bold mb-3" style="color: #1E293B;">Submit a New Support Ticket</h3>
+                            <form action="/my/tickets/submit" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="hdpSubject">Subject <span class="text-danger">*</span></label>
+                                    <input type="text" name="subject" id="hdpSubject" class="form-control"
+                                           required="required" placeholder="Briefly describe the issue..."/>
+                                </div>
+
+                                <div class="row g-3 mb-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold" for="hdpCategory">Category</label>
+                                        <select name="category_id" id="hdpCategory" class="form-select">
+                                            <option value="">Auto-Detect Category</option>
+                                            <t t-foreach="categories" t-as="c">
+                                                <option t-att-value="c.id"><t t-out="c.name"/></option>
+                                            </t>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold" for="hdpType">Ticket Type</label>
+                                        <select name="ticket_type" id="hdpType" class="form-select">
+                                            <option value="question">Question</option>
+                                            <option value="incident">Incident</option>
+                                            <option value="problem">Problem</option>
+                                            <option value="service_request">Service Request</option>
+                                            <option value="bug">Bug Report</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold" for="hdpPriority">Priority</label>
+                                        <select name="priority" id="hdpPriority" class="form-select">
+                                            <option value="0">Low</option>
+                                            <option value="1" selected="selected">Medium</option>
+                                            <option value="2">High</option>
+                                            <option value="3">Urgent</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="hdpDescription">Detailed Description <span class="text-danger">*</span></label>
+                                    <textarea name="description" id="hdpDescription" rows="6" class="form-control"
+                                              required="required" placeholder="Include steps to reproduce, error messages, and relevant context..."/>
+                                </div>
+
+                                <div class="mb-4">
+                                    <label class="form-label fw-semibold" for="hdpAttachment">Attachment (Optional)</label>
+                                    <input type="file" name="attachment" id="hdpAttachment" class="form-control"/>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="/my/tickets" class="btn btn-light">Cancel</a>
+                                    <button type="submit" class="btn btn-primary" style="background-color: #2563EB; border-color: #2563EB;">
+                                        <i class="fa fa-paper-plane me-1" title="Submit"/>Submit Ticket
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Suggested Knowledge Base Articles Sidebar -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm p-4" style="background-color: #F8FAFC;">
+                            <h5 class="h6 fw-bold mb-2" style="color: #1E293B;">
+                                <i class="fa fa-lightbulb-o text-warning me-2" title="Suggestions"/>Suggested Knowledge Articles
+                            </h5>
+                            <p class="small text-muted mb-3">
+                                Check these self-service guides that may immediately resolve your question:
+                            </p>
+                            <div id="hdpSuggestedArticles">
+                                <t t-foreach="faqs" t-as="faq">
+                                    <div class="p-2 mb-2 rounded bg-white border">
+                                        <a t-attf-href="/helpdesk/knowledge/#{faq.id}" target="_blank" class="fw-semibold small text-decoration-none d-block" style="color: #2563EB;">
+                                            <t t-out="faq.name"/>
+                                        </a>
+                                        <div class="text-muted" style="font-size: 0.76rem;"><t t-out="faq.summary"/></div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+            (function () {
+                var subjEl = document.getElementById('hdpSubject');
+                var catEl = document.getElementById('hdpCategory');
+                var boxEl = document.getElementById('hdpSuggestedArticles');
+                if (!subjEl || !boxEl) return;
+
+                var timer = null;
+                function updateSuggestions() {
+                    fetch('/helpdesk/kb/suggest', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            jsonrpc: '2.0',
+                            method: 'call',
+                            params: {query: subjEl.value || '', category_id: catEl ? catEl.value : null}
+                        }),
+                    })
+                    .then(function (r) { return r.json(); })
+                    .then(function (res) {
+                        var list = (res &amp;&amp; res.result) || [];
+                        if (!list.length) return;
+                        boxEl.innerHTML = list.map(function (a) {
+                            return (
+                                '&lt;div class="p-2 mb-2 rounded bg-white border"&gt;' +
+                                    '&lt;a href="' + a.url + '" target="_blank" class="fw-semibold small text-decoration-none d-block" style="color:#2563EB;"&gt;' +
+                                        a.title +
+                                    '&lt;/a&gt;' +
+                                    '&lt;div class="text-muted" style="font-size:0.76rem;"&gt;' + (a.summary || '') + '&lt;/div&gt;' +
+                                '&lt;/div&gt;'
+                            );
+                        }).join('');
+                    })
+                    .catch(function () {});
+                }
+
+                subjEl.addEventListener('input', function () {
+                    clearTimeout(timer);
+                    timer = setTimeout(updateSuggestions, 300);
+                });
+                if (catEl) {
+                    catEl.addEventListener('change', updateSuggestions);
+                }
+            })();
+            </script>
+        </t>
+    </template>
+
+    <!-- 4. Portal Ticket Detail View (/my/tickets/<id>) -->
+    <template id="portal_ticket_detail" name="Support Ticket Detail">
+        <t t-call="portal.portal_layout">
+            <div class="container py-4">
+                <div class="mb-3 d-flex justify-content-between align-items-center">
+                    <a href="/my/tickets" class="text-decoration-none small">
+                        <i class="fa fa-arrow-left me-1" title="Back"/>Back to My Tickets
+                    </a>
+                </div>
+
+                <div t-if="error" class="alert alert-danger" role="alert">
+                    <i class="fa fa-exclamation-triangle me-2" title="Error"/><t t-out="error"/>
+                </div>
+                <div t-if="success" class="alert alert-success" role="alert">
+                    <i class="fa fa-check-circle me-2" title="Success"/>Your update has been saved.
+                </div>
+
+                <div class="row g-4">
+                    <!-- Main Ticket Content & Public Conversation -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm p-4 mb-4">
+                            <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 pb-3 mb-3 border-bottom">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="badge text-bg-dark"><t t-out="ticket.name"/></span>
+                                        <span class="badge text-bg-info"><t t-out="dict(ticket._fields['state'].selection).get(ticket.state)"/></span>
+                                    </div>
+                                    <h2 class="h4 fw-bold mb-0" style="color: #1E293B;"><t t-out="ticket.subject"/></h2>
+                                </div>
+                                <form t-if="ticket.state in ('resolved', 'closed')"
+                                      t-attf-action="/my/tickets/#{ticket.id}/reopen" method="POST">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <button type="submit" class="btn btn-sm btn-outline-warning">
+                                        <i class="fa fa-refresh me-1" title="Reopen"/>Reopen Ticket
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="mb-3">
+                                <h6 class="text-uppercase small fw-bold text-muted">Issue Description</h6>
+                                <div t-out="ticket.description"/>
+                            </div>
+
+                            <div t-if="ticket.resolution_summary" class="p-3 rounded-3 mt-3"
+                                 style="background-color: #F0FDF4; border-left: 4px solid #16A34A;">
+                                <h6 class="fw-bold mb-1" style="color: #16A34A;">
+                                    <i class="fa fa-check-circle me-1" title="Resolved"/>Official Resolution Summary
+                                </h6>
+                                <div style="white-space: pre-line;" t-out="ticket.resolution_summary"/>
+                            </div>
+                        </div>
+
+                        <!-- Customer Satisfaction (CSAT) Rating Card when Resolved/Closed -->
+                        <div t-if="ticket.state in ('resolved', 'closed')" class="card border-0 shadow-sm p-4 mb-4">
+                            <h5 class="h6 fw-bold mb-2" style="color: #1E293B;">
+                                <i class="fa fa-star text-warning me-1" title="CSAT"/>Rate Your Support Experience
+                            </h5>
+                            <t t-if="ticket.csat_rating">
+                                <div class="text-success fw-semibold">
+                                    Thank you! You rated this ticket: <t t-out="dict(ticket._fields['csat_rating'].selection).get(ticket.csat_rating)"/>
+                                </div>
+                                <div t-if="ticket.csat_comment" class="small text-muted mt-1">
+                                    "<t t-out="ticket.csat_comment"/>"
+                                </div>
+                            </t>
+                            <form t-else="" t-attf-action="/my/tickets/#{ticket.id}/rate" method="POST">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <div class="row g-2 align-items-center mb-2">
+                                    <div class="col-md-5">
+                                        <select name="csat_rating" class="form-select form-select-sm" required="required">
+                                            <option value="5">5 - Very Satisfied</option>
+                                            <option value="4">4 - Satisfied</option>
+                                            <option value="3">3 - Neutral</option>
+                                            <option value="2">2 - Dissatisfied</option>
+                                            <option value="1">1 - Very Dissatisfied</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <input type="text" name="csat_comment" class="form-control form-control-sm" placeholder="Optional feedback comment..."/>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn btn-sm btn-success w-100">Submit</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Public Communication Timeline -->
+                        <div class="card border-0 shadow-sm p-4">
+                            <h5 class="h6 fw-bold mb-3" style="color: #1E293B;">
+                                <i class="fa fa-comments-o me-2" title="Messages"/>Conversation History
+                            </h5>
+
+                            <form t-if="ticket.state not in ('closed', 'cancelled')"
+                                  t-attf-action="/my/tickets/#{ticket.id}/reply" method="POST"
+                                  enctype="multipart/form-data" class="mb-4 pb-3 border-bottom">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <div class="mb-2">
+                                    <textarea name="message" rows="3" class="form-control" placeholder="Write a reply to our support team..."/>
+                                </div>
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                                    <input type="file" name="attachment" class="form-control form-control-sm" style="max-width: 280px;"/>
+                                    <button type="submit" class="btn btn-primary btn-sm" style="background-color: #2563EB;">
+                                        <i class="fa fa-reply me-1" title="Reply"/>Send Reply
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div t-if="not public_messages" class="text-muted small py-3 text-center">
+                                No public messages yet.
+                            </div>
+                            <t t-foreach="public_messages" t-as="msg">
+                                <div class="p-3 mb-2 rounded border" style="background-color: #F8FAFC;">
+                                    <div class="d-flex justify-content-between small text-muted mb-1">
+                                        <strong class="text-dark"><t t-out="msg.author_id.name or 'Support Team'"/></strong>
+                                        <span t-field="msg.date" t-options="{'widget': 'datetime'}"/>
+                                    </div>
+                                    <div t-out="msg.body"/>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar Metadata & Attachments -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm p-4 mb-4">
+                            <h5 class="h6 fw-bold mb-3" style="color: #1E293B;">Ticket Details</h5>
+                            <dl class="row small mb-0">
+                                <dt class="col-5 text-muted">Reference:</dt>
+                                <dd class="col-7 fw-semibold"><t t-out="ticket.name"/></dd>
+
+                                <dt class="col-5 text-muted">Support Team:</dt>
+                                <dd class="col-7"><t t-out="ticket.team_id.name or 'General Support'"/></dd>
+
+                                <dt class="col-5 text-muted">Assigned Agent:</dt>
+                                <dd class="col-7"><t t-out="ticket.user_id.name or 'Awaiting Assignment'"/></dd>
+
+                                <dt class="col-5 text-muted">Category:</dt>
+                                <dd class="col-7"><t t-out="ticket.category_id.name or 'General'"/></dd>
+
+                                <dt class="col-5 text-muted">Priority:</dt>
+                                <dd class="col-7"><t t-out="dict(ticket._fields['priority'].selection).get(ticket.priority)"/></dd>
+
+                                <dt class="col-5 text-muted">Created On:</dt>
+                                <dd class="col-7"><span t-field="ticket.create_date" t-options="{'widget': 'datetime'}"/></dd>
+
+                                <t t-if="ticket.sla_deadline">
+                                    <dt class="col-5 text-muted">Target SLA:</dt>
+                                    <dd class="col-7"><span t-field="ticket.sla_deadline" t-options="{'widget': 'datetime'}"/></dd>
+                                </t>
+                            </dl>
+                        </div>
+
+                        <div class="card border-0 shadow-sm p-4">
+                            <h5 class="h6 fw-bold mb-3" style="color: #1E293B;">
+                                <i class="fa fa-paperclip me-1" title="Attachments"/>Attachments (<t t-out="len(attachments)"/>)
+                            </h5>
+                            <div t-if="not attachments" class="small text-muted">No files attached.</div>
+                            <ul t-else="" class="list-unstyled small mb-0">
+                                <t t-foreach="attachments" t-as="att">
+                                    <li class="mb-2">
+                                        <a t-attf-href="/my/tickets/#{ticket.id}/attachment/#{att.id}" class="text-decoration-none">
+                                            <i class="fa fa-download me-1" title="Download"/><t t-out="att.name"/>
+                                        </a>
+                                    </li>
+                                </t>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- 5. Public/Portal Knowledge Base Home (/helpdesk/knowledge) -->
+    <template id="portal_knowledge_home" name="HelpDeskPro Knowledge Base">
+        <t t-call="website.layout">
+            <div class="container py-5">
+                <div class="p-4 p-md-5 rounded-4 mb-4 text-center"
+                     style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%); color: #FFFFFF;">
+                    <h1 class="h2 fw-bold text-white mb-2">HelpDeskPro Knowledge Base &amp; FAQ</h1>
+                    <p class="mb-4" style="color: #94A3B8;">Search step-by-step guides, troubleshooting solutions, and frequently asked questions.</p>
+                    <form action="/helpdesk/knowledge" method="GET" class="mx-auto" style="max-width: 560px;">
+                        <div class="input-group">
+                            <input type="search" name="search" class="form-control"
+                                   placeholder="Search articles, keywords, or error codes..." t-att-value="search"/>
+                            <button class="btn btn-primary" type="submit" style="background-color: #2563EB;">
+                                <i class="fa fa-search me-1" title="Search"/>Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <a href="/helpdesk/knowledge" t-attf-class="btn btn-sm #{not selected_cat and 'btn-dark' or 'btn-outline-secondary'}">
+                        All Categories
+                    </a>
+                    <t t-foreach="categories" t-as="cat">
+                        <a t-attf-href="/helpdesk/knowledge?category_id=#{cat.id}"
+                           t-attf-class="btn btn-sm #{selected_cat and selected_cat.id == cat.id and 'btn-dark' or 'btn-outline-secondary'}">
+                            <t t-out="cat.name"/> (<t t-out="cat.article_count"/>)
+                        </a>
+                    </t>
+                    <a href="/my/tickets/new" class="btn btn-sm btn-primary ms-auto" style="background-color: #2563EB;">
+                        Submit a Ticket
+                    </a>
+                </div>
+
+                <div class="row g-3">
+                    <t t-foreach="articles" t-as="art">
+                        <div class="col-md-6">
+                            <div class="card h-100 border shadow-sm p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge text-bg-light border text-secondary"><t t-out="art.category_id.name"/></span>
+                                    <span t-if="art.is_faq" class="badge text-bg-warning">FAQ</span>
+                                </div>
+                                <h5 class="h6 fw-bold mb-1">
+                                    <a t-attf-href="/helpdesk/knowledge/#{art.id}" class="text-decoration-none" style="color: #1E293B;">
+                                        <t t-out="art.name"/>
+                                    </a>
+                                </h5>
+                                <p class="small text-muted mb-2"><t t-out="art.summary"/></p>
+                                <div class="mt-auto d-flex justify-content-between small text-muted pt-2 border-top">
+                                    <span><i class="fa fa-eye me-1" title="Views"/><t t-out="art.views_count"/> views</span>
+                                    <a t-attf-href="/helpdesk/knowledge/#{art.id}" class="fw-semibold text-decoration-none" style="color: #2563EB;">
+                                        Read Guide <i class="fa fa-arrow-right ms-1" title="Read"/>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- 6. Knowledge Article Detail (/helpdesk/knowledge/<id>) -->
+    <template id="portal_knowledge_article_detail" name="Knowledge Base Article">
+        <t t-call="website.layout">
+            <div class="container py-5" style="max-width: 860px;">
+                <div class="mb-3">
+                    <a href="/helpdesk/knowledge" class="text-decoration-none small">
+                        <i class="fa fa-arrow-left me-1" title="Back"/>Back to Knowledge Base
+                    </a>
+                </div>
+                <div class="card border-0 shadow-sm p-4 p-md-5">
+                    <div class="mb-2">
+                        <span class="badge text-bg-primary"><t t-out="article.category_id.name"/></span>
+                        <span t-if="article.is_faq" class="badge text-bg-warning ms-1">FAQ</span>
+                    </div>
+                    <h1 class="h3 fw-bold mb-3" style="color: #1E293B;"><t t-out="article.name"/></h1>
+                    <div class="small text-muted pb-3 mb-4 border-bottom">
+                        Views: <t t-out="article.views_count"/> · Helpful votes: <t t-out="article.helpful_count"/>
+                    </div>
+                    <div class="mb-4" t-out="article.content"/>
+                    <div class="p-3 rounded bg-light d-flex justify-content-between align-items-center">
+                        <span class="small fw-semibold">Was this article helpful?</span>
+                        <span t-if="voted" class="badge text-bg-success">Thank you for your feedback!</span>
+                        <form t-else="" t-attf-action="/helpdesk/knowledge/#{article.id}/helpful" method="POST">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <button type="submit" class="btn btn-sm btn-outline-success">
+                                <i class="fa fa-thumbs-up me-1" title="Helpful"/>Yes, Helpful
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

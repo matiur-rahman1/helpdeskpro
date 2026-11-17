@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ========================================================== -->
+    <!-- 1. TICKET SEARCH VIEW                                      -->
+    <!-- ========================================================== -->
+    <record id="view_helpdesk_ticket_search" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.search</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <search string="Search Support Tickets">
+                <field name="name" filter_domain="['|', '|', ('name', 'ilike', self), ('subject', 'ilike', self), ('customer_email', 'ilike', self)]" string="Ticket / Subject / Email"/>
+                <field name="partner_id"/>
+                <field name="team_id"/>
+                <field name="user_id"/>
+                <field name="category_id"/>
+                <field name="tag_ids"/>
+
+                <filter name="filter_my_tickets" string="My Tickets" domain="[('user_id', '=', uid)]"/>
+                <filter name="filter_unassigned" string="Unassigned" domain="[('user_id', '=', False), ('state', 'not in', ['resolved', 'closed', 'cancelled'])]"/>
+                <separator/>
+                <filter name="filter_active" string="Active Tickets" domain="[('state', 'in', ['new', 'open', 'in_progress', 'pending_customer', 'pending_internal'])]"/>
+                <filter name="filter_new" string="New" domain="[('state', '=', 'new')]"/>
+                <filter name="filter_in_progress" string="In Progress" domain="[('state', '=', 'in_progress')]"/>
+                <filter name="filter_resolved" string="Resolved" domain="[('state', '=', 'resolved')]"/>
+                <filter name="filter_closed" string="Closed" domain="[('state', '=', 'closed')]"/>
+                <separator/>
+                <filter name="filter_urgent" string="Urgent &amp; High Priority" domain="[('priority', 'in', ['2', '3'])]"/>
+                <filter name="filter_overdue" string="Overdue" domain="[('is_overdue', '=', True)]"/>
+                <filter name="filter_sla_warning" string="SLA Warning" domain="[('sla_status', '=', 'warning')]"/>
+                <filter name="filter_sla_breached" string="SLA Breached" domain="[('sla_status', '=', 'breached')]"/>
+
+                <group expand="0" string="Group By">
+                    <filter name="group_state" string="Status" context="{'group_by': 'state'}"/>
+                    <filter name="group_team" string="Support Team" context="{'group_by': 'team_id'}"/>
+                    <filter name="group_agent" string="Assigned Agent" context="{'group_by': 'user_id'}"/>
+                    <filter name="group_priority" string="Priority" context="{'group_by': 'priority'}"/>
+                    <filter name="group_category" string="Category" context="{'group_by': 'category_id'}"/>
+                    <filter name="group_type" string="Ticket Type" context="{'group_by': 'ticket_type'}"/>
+                    <filter name="group_sla_status" string="SLA Status" context="{'group_by': 'sla_status'}"/>
+                    <filter name="group_customer" string="Customer" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_create_date" string="Creation Date" context="{'group_by': 'create_date:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ========================================================== -->
+    <!-- 2. TICKET KANBAN VIEW                                      -->
+    <!-- ========================================================== -->
+    <record id="view_helpdesk_ticket_kanban" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.kanban</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" class="o_kanban_small_column hdp-ticket-kanban" sample="1">
+                <field name="name"/>
+                <field name="subject"/>
+                <field name="partner_id"/>
+                <field name="team_id"/>
+                <field name="user_id"/>
+                <field name="priority"/>
+                <field name="ticket_type"/>
+                <field name="category_id"/>
+                <field name="state"/>
+                <field name="sla_status"/>
+                <field name="sla_deadline"/>
+                <field name="is_overdue"/>
+                <field name="color"/>
+                <templates>
+                    <t t-name="card">
+                        <div t-attf-class="hdp-k-card hdp-prio-#{record.priority.raw_value} #{record.is_overdue.raw_value ? 'is-overdue' : ''}">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="hdp-k-ref fw-bold"><field name="name"/></span>
+                                <div class="d-flex align-items-center gap-1">
+                                    <span t-if="record.priority.raw_value == '3'" class="hdp-prio-badge hdp-p-urgent">Urgent</span>
+                                    <span t-elif="record.priority.raw_value == '2'" class="hdp-prio-badge hdp-p-high">High</span>
+                                    <span t-elif="record.priority.raw_value == '1'" class="hdp-prio-badge hdp-p-med">Medium</span>
+                                    <span t-else="" class="hdp-prio-badge hdp-p-low">Low</span>
+                                </div>
+                            </div>
+
+                            <div class="hdp-k-subject fw-semibold text-dark mb-2">
+                                <field name="subject"/>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <span t-if="record.category_id.raw_value" class="badge text-bg-light border text-secondary">
+                                    <field name="category_id"/>
+                                </span>
+                                <span t-if="record.sla_status.raw_value == 'breached'" class="badge text-bg-danger">
+                                    <i class="fa fa-exclamation-triangle me-1" title="SLA Breached"/>SLA Breached
+                                </span>
+                                <span t-elif="record.sla_status.raw_value == 'warning'" class="badge text-bg-warning">
+                                    <i class="fa fa-clock-o me-1" title="SLA Warning"/>SLA Warning
+                                </span>
+                                <span t-elif="record.sla_status.raw_value == 'completed'" class="badge text-bg-success">
+                                    <i class="fa fa-check me-1" title="SLA Met"/>SLA Met
+                                </span>
+                                <span t-if="record.is_overdue.raw_value" class="badge text-bg-danger">
+                                    Overdue
+                                </span>
+                            </div>
+
+                            <div class="mb-2">
+                                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center pt-2 border-top small text-muted">
+                                <div class="text-truncate" style="max-width: 155px;">
+                                    <i class="fa fa-user-o me-1" title="Customer"/>
+                                    <t t-if="record.partner_id.raw_value"><field name="partner_id"/></t>
+                                    <t t-else="">Guest</t>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                    <field name="user_id" widget="many2one_avatar_user"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- ========================================================== -->
+    <!-- 3. TICKET LIST VIEW                                        -->
+    <!-- ========================================================== -->
+    <record id="view_helpdesk_ticket_list" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.list</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <list string="Support Tickets"
+                  decoration-danger="is_overdue or sla_status == 'breached'"
+                  decoration-warning="sla_status == 'warning'"
+                  decoration-muted="state in ('closed', 'cancelled')"
+                  multi_edit="1">
+                <field name="is_overdue" column_invisible="1"/>
+                <field name="name" decoration-bf="1"/>
+                <field name="subject"/>
+                <field name="partner_id"/>
+                <field name="team_id" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+                <field name="category_id" optional="show"/>
+                <field name="ticket_type" optional="hide"/>
+                <field name="priority" widget="badge"
+                       decoration-danger="priority == '3'"
+                       decoration-warning="priority == '2'"
+                       decoration-info="priority == '1'"
+                       decoration-muted="priority == '0'"/>
+                <field name="sla_status" widget="badge" optional="show"
+                       decoration-success="sla_status in ('on_track', 'completed')"
+                       decoration-warning="sla_status == 'warning'"
+                       decoration-danger="sla_status == 'breached'"/>
+                <field name="sla_deadline" optional="show"/>
+                <field name="create_date" optional="show"/>
+                <field name="resolution_hours" optional="hide" avg="Avg Resolution"/>
+                <field name="csat_rating" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state in ('new', 'open')"
+                       decoration-primary="state == 'in_progress'"
+                       decoration-warning="state in ('pending_customer', 'pending_internal')"
+                       decoration-success="state in ('resolved', 'closed')"
+                       decoration-danger="state == 'cancelled'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ========================================================== -->
+    <!-- 4. TICKET FORM VIEW                                        -->
+    <!-- ========================================================== -->
+    <record id="view_helpdesk_ticket_form" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.form</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <form string="Support Ticket" class="hdp-ticket-form">
+                <header>
+                    <button name="action_assign_to_me" string="Assign to Me" type="object"
+                            class="btn-primary" invisible="user_id == uid or state in ('resolved', 'closed', 'cancelled')"
+                            groups="helpdeskpro.group_helpdesk_agent"/>
+                    <button name="action_auto_assign" string="Auto-Assign Agent" type="object"
+                            class="btn-secondary" invisible="user_id or state in ('resolved', 'closed', 'cancelled')"
+                            groups="helpdeskpro.group_helpdesk_leader"/>
+                    <button name="action_open" string="Acknowledge (Open)" type="object"
+                            class="btn-primary" invisible="state != 'new'"/>
+                    <button name="action_start_progress" string="Start Work" type="object"
+                            class="btn-primary" invisible="state not in ('new', 'open', 'pending_customer', 'pending_internal')"/>
+                    <button name="action_pending_customer" string="Wait on Customer" type="object"
+                            class="btn-secondary" invisible="state not in ('open', 'in_progress')"/>
+                    <button name="action_pending_internal" string="Wait on Internal" type="object"
+                            class="btn-secondary" invisible="state not in ('open', 'in_progress')"/>
+                    <button name="action_resolve" string="Resolve Ticket" type="object"
+                            class="btn-success" invisible="state in ('resolved', 'closed', 'cancelled')"/>
+                    <button name="action_close" string="Close Ticket" type="object"
+                            class="btn-secondary" invisible="state != 'resolved'"/>
+                    <button name="action_reopen" string="Reopen Ticket" type="object"
+                            class="btn-warning" invisible="state not in ('resolved', 'closed', 'cancelled')"/>
+                    <button name="action_cancel" string="Cancel" type="object"
+                            invisible="state in ('closed', 'cancelled')"/>
+                    <button name="action_ai_categorize" string="Smart Categorize" type="object"
+                            icon="fa-magic" class="btn-secondary" invisible="state in ('resolved', 'closed', 'cancelled')"/>
+                    <button name="action_open_merge_wizard" string="Merge Duplicates" type="object"
+                            icon="fa-code-fork" class="btn-secondary" invisible="duplicate_count == 0"
+                            groups="helpdeskpro.group_helpdesk_agent"/>
+
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="new,open,in_progress,pending_customer,resolved,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_duplicates"
+                                icon="fa-clone" invisible="duplicate_count == 0">
+                            <field string="Duplicates" name="duplicate_count" widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_view_attachments"
+                                icon="fa-paperclip">
+                            <field string="Attachments" name="attachment_count" widget="statinfo"/>
+                        </button>
+                    </div>
+
+                    <widget name="web_ribbon" title="SLA Breached" bg_color="text-bg-danger"
+                            invisible="sla_status != 'breached'"/>
+                    <widget name="web_ribbon" title="Resolved" bg_color="text-bg-success"
+                            invisible="state != 'resolved' or sla_status == 'breached'"/>
+
+                    <field name="is_overdue" invisible="1"/>
+                    <field name="duplicate_count" invisible="1"/>
+                    <field name="team_member_ids" invisible="1"/>
+
+                    <!-- Duplicate Detection Banner -->
+                    <div class="alert alert-warning d-flex align-items-center justify-content-between mb-3"
+                         role="alert" invisible="duplicate_count == 0">
+                        <div>
+                            <i class="fa fa-exclamation-circle me-2" title="Duplicate Alert"/>
+                            <strong>Potential Duplicate Detected:</strong>
+                            This customer has <field name="duplicate_count" readonly="1" class="d-inline fw-bold"/> other ticket(s) with a similar subject.
+                        </div>
+                        <button name="action_open_merge_wizard" type="object" string="Review &amp; Merge"
+                                class="btn btn-sm btn-warning" groups="helpdeskpro.group_helpdesk_agent"/>
+                    </div>
+
+                    <!-- Merged Ticket Notice -->
+                    <div class="alert alert-info mb-3" role="alert" invisible="not merged_into_id">
+                        <i class="fa fa-code-fork me-2" title="Merged"/>
+                        This ticket was consolidated and merged into primary ticket <field name="merged_into_id" readonly="1" class="fw-bold"/>.
+                    </div>
+
+                    <div class="oe_title">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge text-bg-dark fs-6"><field name="name"/></span>
+                            <field name="sla_status" widget="badge"
+                                   invisible="sla_status == 'na'"
+                                   decoration-success="sla_status in ('on_track', 'completed')"
+                                   decoration-warning="sla_status == 'warning'"
+                                   decoration-danger="sla_status == 'breached'"/>
+                            <span class="badge text-bg-danger" invisible="not is_overdue">OVERDUE</span>
+                        </div>
+                        <h1>
+                            <field name="subject" placeholder="Summarize the customer issue..."/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Customer Information">
+                            <field name="partner_id" context="{'res_partner_search_mode': 'customer'}"/>
+                            <field name="customer_email" widget="email"/>
+                            <field name="customer_phone" widget="phone"/>
+                            <field name="source"/>
+                        </group>
+                        <group string="Assignment &amp; Classification">
+                            <field name="team_id"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="priority" widget="radio" options="{'horizontal': true}"/>
+                            <field name="ticket_type"/>
+                            <field name="category_id"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="SLA &amp; Deadlines">
+                            <field name="sla_id"/>
+                            <field name="sla_response_deadline"/>
+                            <field name="sla_response_status" widget="badge"
+                                   decoration-success="sla_response_status in ('on_track', 'completed')"
+                                   decoration-warning="sla_response_status == 'warning'"
+                                   decoration-danger="sla_response_status == 'breached'"/>
+                            <field name="sla_deadline"/>
+                            <field name="deadline"/>
+                            <field name="is_escalated" readonly="1" invisible="not is_escalated"/>
+                        </group>
+                        <group string="Lifecycle Timestamps &amp; Metrics">
+                            <field name="create_date" string="Created On" readonly="1"/>
+                            <field name="first_response_date"/>
+                            <field name="response_hours"/>
+                            <field name="resolution_date"/>
+                            <field name="resolution_hours"/>
+                            <field name="closing_date"/>
+                            <field name="reopen_count" invisible="reopen_count == 0"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Issue Description" name="description">
+                            <field name="description" placeholder="Detailed description of the customer's issue, steps to reproduce, and environment details..."/>
+                        </page>
+                        <page string="Resolution Summary" name="resolution">
+                            <field name="resolution_summary" placeholder="Document how this ticket was resolved (visible to the customer upon resolution)..."/>
+                        </page>
+                        <page string="Internal Notes (Staff Only)" name="internal_notes" groups="helpdeskpro.group_helpdesk_user">
+                            <div class="alert alert-secondary small py-2 mb-2" role="alert">
+                                <i class="fa fa-lock me-1" title="Private"/>
+                                <strong>Private Internal Note:</strong> Never exposed to customers via portal or email.
+                            </div>
+                            <field name="internal_notes" placeholder="Add private technical investigation notes for support staff..."/>
+                        </page>
+                        <page string="Customer Satisfaction (CSAT)" name="csat">
+                            <group>
+                                <group>
+                                    <field name="csat_rating"/>
+                                    <field name="csat_date"/>
+                                </group>
+                                <group>
+                                    <field name="csat_comment" placeholder="Customer feedback comments..."/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- ========================================================== -->
+    <!-- 5. CALENDAR, PIVOT & GRAPH VIEWS                           -->
+    <!-- ========================================================== -->
+    <record id="view_helpdesk_ticket_calendar" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.calendar</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <calendar string="Tickets Calendar" date_start="create_date" color="team_id" mode="month">
+                <field name="name"/>
+                <field name="subject"/>
+                <field name="partner_id"/>
+                <field name="user_id" avatar_field="avatar_128"/>
+                <field name="priority"/>
+                <field name="state"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_ticket_pivot" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.pivot</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <pivot string="Tickets Pivot Analysis" sample="1">
+                <field name="team_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="resolution_hours" type="measure"/>
+                <field name="response_hours" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_ticket_graph" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.graph</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <graph string="Support Tickets Analysis" type="bar" sample="1">
+                <field name="team_id"/>
+                <field name="state"/>
+            </graph>
+        </field>
+    </record>
+
+    <!-- ========================================================== -->
+    <!-- 6. TICKET WINDOW ACTIONS                                   -->
+    <!-- ========================================================== -->
+    <record id="action_helpdesk_ticket_all" model="ir.actions.act_window">
+        <field name="name">All Tickets</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">kanban,list,form,calendar,pivot,graph</field>
+        <field name="search_view_id" ref="view_helpdesk_ticket_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Create your first Support Ticket</p>
+            <p>HelpDeskPro automatically assigns a ticket sequence, calculates SLA deadlines, and routes tickets to the appropriate support team.</p>
+        </field>
+    </record>
+
+    <record id="action_helpdesk_ticket_my" model="ir.actions.act_window">
+        <field name="name">My Tickets</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">kanban,list,form,calendar,pivot,graph</field>
+        <field name="search_view_id" ref="view_helpdesk_ticket_search"/>
+        <field name="context">{'search_default_filter_my_tickets': 1, 'search_default_filter_active': 1}</field>
+    </record>
+
+    <record id="action_helpdesk_ticket_unassigned" model="ir.actions.act_window">
+        <field name="name">Unassigned Tickets</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="view_helpdesk_ticket_search"/>
+        <field name="context">{'search_default_filter_unassigned': 1}</field>
+    </record>
+
+    <record id="action_helpdesk_ticket_overdue" model="ir.actions.act_window">
+        <field name="name">Overdue &amp; SLA Breached Tickets</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="view_helpdesk_ticket_search"/>
+        <field name="domain">['|', ('is_overdue', '=', True), ('sla_status', '=', 'breached')]</field>
+    </record>
+</odoo>

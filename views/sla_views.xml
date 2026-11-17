@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_helpdesk_sla_list" model="ir.ui.view">
+        <field name="name">helpdesk.sla.list</field>
+        <field name="model">helpdesk.sla</field>
+        <field name="arch" type="xml">
+            <list string="SLA Policies">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="priority" widget="badge"
+                       decoration-danger="priority == '3'"
+                       decoration-warning="priority == '2'"
+                       decoration-info="priority == '1'"/>
+                <field name="team_ids" widget="many2many_tags" optional="show"/>
+                <field name="response_time_hours" string="Response Target (h)"/>
+                <field name="resolution_time_hours" string="Resolution Target (h)"/>
+                <field name="warning_threshold_pct" string="Warning (%)"/>
+                <field name="auto_escalate"/>
+                <field name="ticket_count"/>
+                <field name="compliance_rate" string="Compliance %"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_sla_form" model="ir.ui.view">
+        <field name="name">helpdesk.sla.form</field>
+        <field name="model">helpdesk.sla</field>
+        <field name="arch" type="xml">
+            <form string="SLA Policy">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_tickets" icon="fa-shield">
+                            <field string="SLA Tickets" name="ticket_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. P1 Critical Incident SLA"/></h1>
+                    </div>
+                    <group>
+                        <group string="Matching Criteria">
+                            <field name="sequence"/>
+                            <field name="priority"/>
+                            <field name="team_ids" widget="many2many_tags"/>
+                            <field name="ticket_type"/>
+                            <field name="category_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="SLA Time Targets &amp; Escalation">
+                            <field name="response_time_hours"/>
+                            <field name="resolution_time_hours"/>
+                            <field name="warning_threshold_pct"/>
+                            <field name="auto_escalate"/>
+                            <field name="escalate_user_id" invisible="not auto_escalate"/>
+                            <field name="compliance_rate" readonly="1"/>
+                            <field name="breached_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Policy Notes">
+                        <field name="description" nolabel="1" placeholder="Define service level commitments and escalation workflow..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_helpdesk_sla" model="ir.actions.act_window">
+        <field name="name">SLA Policies</field>
+        <field name="res_model">helpdesk.sla</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

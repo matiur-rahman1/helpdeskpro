@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Resolve / Close Ticket Wizard View -->
+    <record id="view_helpdesk_ticket_close_wizard_form" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.close.wizard.form</field>
+        <field name="model">helpdesk.ticket.close.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Resolve / Close Support Ticket">
+                <group>
+                    <field name="ticket_id" readonly="1"/>
+                    <field name="target_state" widget="radio" options="{'horizontal': true}"/>
+                </group>
+                <group string="Resolution Details">
+                    <field name="resolution_summary" nolabel="1" placeholder="Describe the root cause and how the issue was resolved..."/>
+                </group>
+                <group>
+                    <group>
+                        <field name="notify_customer"/>
+                        <field name="create_kb_article"/>
+                    </group>
+                    <group invisible="not create_kb_article">
+                        <field name="kb_category_id" required="create_kb_article"/>
+                        <field name="kb_title" required="create_kb_article"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_confirm" string="Confirm &amp; Save" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- 2. Merge Duplicate Tickets Wizard View -->
+    <record id="view_helpdesk_ticket_merge_wizard_form" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.merge.wizard.form</field>
+        <field name="model">helpdesk.ticket.merge.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Merge Duplicate Tickets">
+                <div class="alert alert-info mb-3" role="alert">
+                    <i class="fa fa-code-fork me-2" title="Merge"/>
+                    All descriptions, attachments, tags, and followers from the secondary tickets will be consolidated into the Primary Destination Ticket. Secondary tickets will be marked as Cancelled.
+                </div>
+                <group>
+                    <field name="target_ticket_id" domain="[('id', 'in', ticket_ids)]"/>
+                    <field name="merge_reason"/>
+                </group>
+                <group string="Tickets to Consolidate">
+                    <field name="ticket_ids" nolabel="1">
+                        <list>
+                            <field name="name"/>
+                            <field name="subject"/>
+                            <field name="partner_id"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </group>
+                <footer>
+                    <button name="action_merge_tickets" string="Merge Tickets" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

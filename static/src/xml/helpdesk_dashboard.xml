@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="helpdeskpro.Dashboard">
+        <div class="hdp-dashboard">
+            <!-- Header Bar with Dynamic Filters -->
+            <header class="hdp-header">
+                <div>
+                    <h1 class="hdp-header-title">
+                        <i class="fa fa-life-ring me-2" title="HelpDeskPro"/>HelpDeskPro Executive Support Center
+                    </h1>
+                    <div class="hdp-header-sub">
+                        Real-time Ticket Operations, SLA Compliance &amp; Team Workload Analytics
+                    </div>
+                </div>
+
+                <div class="hdp-toolbar">
+                    <select class="hdp-filter-select" t-on-change="onDateRangeChange" t-att-value="state.dateRange" aria-label="Date Range Filter">
+                        <option value="today">Today</option>
+                        <option value="7d">Last 7 Days</option>
+                        <option value="30d" selected="selected">Last 30 Days</option>
+                        <option value="month">This Month</option>
+                        <option value="90d">Last 90 Days</option>
+                        <option value="all">All Time</option>
+                    </select>
+
+                    <select class="hdp-filter-select" t-on-change="onTeamChange" t-att-value="state.teamId" aria-label="Support Team Filter">
+                        <option value="">All Support Teams</option>
+                        <t t-if="state.data">
+                            <t t-foreach="state.data.teams" t-as="tm" t-key="tm.id">
+                                <option t-att-value="tm.id"><t t-esc="tm.name"/></option>
+                            </t>
+                        </t>
+                    </select>
+
+                    <button class="hdp-btn-ghost" t-on-click="() => this.fetchDashboardData()" title="Refresh Dashboard">
+                        <i t-attf-class="fa fa-refresh #{state.loading ? 'fa-spin' : ''}" title="Refresh"/>
+                    </button>
+
+                    <button class="hdp-btn-primary" t-on-click="() => this.createNewTicket()">
+                        <i class="fa fa-plus me-1" title="New Ticket"/>New Ticket
+                    </button>
+                </div>
+            </header>
+
+            <t t-if="state.loading and !state.data">
+                <div class="text-center py-5 text-muted">
+                    <i class="fa fa-circle-o-notch fa-spin fa-2x mb-2" title="Loading"/>
+                    <div>Loading HelpDeskPro Analytics...</div>
+                </div>
+            </t>
+
+            <t t-if="state.data">
+                <!-- 10 Clickable KPI Cards -->
+                <section class="hdp-kpi-grid">
+                    <t t-foreach="kpiCards" t-as="card" t-key="card.key">
+                        <div class="hdp-kpi-card"
+                             t-attf-style="--kpi-color: #{card.color}; --kpi-bg: #{card.bg};"
+                             t-on-click="() => this.openKpiCard(card.key)">
+                            <div>
+                                <div class="hdp-kpi-val"><t t-esc="card.value"/></div>
+                                <div class="hdp-kpi-label"><t t-esc="card.label"/></div>
+                                <div class="hdp-kpi-sub"><t t-esc="card.sub"/></div>
+                            </div>
+                            <div class="hdp-kpi-icon">
+                                <i t-attf-class="fa #{card.icon}" title="Metric"/>
+                            </div>
+                        </div>
+                    </t>
+                </section>
+
+                <!-- Row 1 Charts: Status, Priority, Team -->
+                <section class="hdp-chart-grid-3">
+                    <!-- Chart 1: Tickets by Status -->
+                    <div class="hdp-panel">
+                        <div class="hdp-panel-head">
+                            <h3 class="hdp-panel-title">
+                                <i class="fa fa-pie-chart text-primary" title="Status"/>Tickets by Status
+                            </h3>
+                        </div>
+                        <div class="hdp-hbar-list">
+                            <t t-if="!statusBars.length">
+                                <div class="text-muted small py-4 text-center">No tickets in selected range</div>
+                            </t>
+                            <t t-foreach="statusBars" t-as="s" t-key="s.key">
+                                <div class="hdp-hbar-row" t-on-click="() => this.openFilteredTickets('state', s.key, s.label)">
+                                    <div class="hdp-hbar-meta">
+                                        <span><t t-esc="s.label"/></span>
+                                        <b><t t-esc="s.count"/></b>
+                                    </div>
+                                    <div class="hdp-hbar-track">
+                                        <div class="hdp-hbar-fill" t-attf-style="width: #{s.pct}%; background-color: #{s.color};"/>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Chart 2: Tickets by Priority -->
+                    <div class="hdp-panel">
+                        <div class="hdp-panel-head">
+                            <h3 class="hdp-panel-title">
+                                <i class="fa fa-flag text-warning" title="Priority"/>Tickets by Priority
+                            </h3>
+                        </div>
+                        <div class="hdp-hbar-list">
+                            <t t-foreach="priorityBars" t-as="p" t-key="p.key">
+                                <div class="hdp-hbar-row" t-on-click="() => this.openFilteredTickets('priority', p.key, p.label)">
+                                    <div class="hdp-hbar-meta">
+                                        <span><t t-esc="p.label"/></span>
+                                        <b><t t-esc="p.count"/></b>
+                                    </div>
+                                    <div class="hdp-hbar-track">
+                                        <div class="hdp-hbar-fill" t-attf-style="width: #{p.pct}%; background-color: #{p.color};"/>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Chart 3: Tickets by Team -->
+                    <div class="hdp-panel">
+                        <div class="hdp-panel-head">
+                            <h3 class="hdp-panel-title">
+                                <i class="fa fa-users text-success" title="Teams"/>Tickets by Support Team
+                            </h3>
+                        </div>
+                        <div class="hdp-hbar-list">
+                            <t t-if="!teamBars.length">
+                                <div class="text-muted small py-4 text-center">No teams configured</div>
+                            </t>
+                            <t t-foreach="teamBars" t-as="tm" t-key="tm.id">
+                                <div class="hdp-hbar-row" t-on-click="() => this.openFilteredTickets('team_id', tm.id, tm.name)">
+                                    <div class="hdp-hbar-meta">
+                                        <span><t t-esc="tm.name"/></span>
+                                        <span><b><t t-esc="tm.count"/></b> <small class="text-muted">(<t t-esc="tm.resolved"/> resolved)</small></span>
+                                    </div>
+                                    <div class="hdp-hbar-track">
+                                        <div class="hdp-hbar-fill" t-attf-style="width: #{tm.pct}%; background-color: #1E293B;"/>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Row 2 Charts: Created Over Time & Resolved Over Time -->
+                <section class="hdp-chart-grid-2">
+                    <!-- Chart 4: Tickets Created Over Time -->
+                    <div class="hdp-panel">
+                        <div class="hdp-panel-head">
+                            <h3 class="hdp-panel-title">
+                                <i class="fa fa-bar-chart text-primary" title="Created Trend"/>Tickets Created Over Time
+                            </h3>
+                        </div>
+                        <div class="hdp-vchart">
+                            <t t-foreach="createdTimeline" t-as="bar" t-key="bar_index">
+                                <div class="hdp-vbar-col" t-att-title="bar.label + ': ' + bar.count + ' created'">
+                                    <div class="hdp-vbar-val"><t t-esc="bar.count"/></div>
+                                    <div class="hdp-vbar-track">
+                                        <div class="hdp-vbar-fill" t-attf-style="height: #{bar.pct}%; background-color: #2563EB;"/>
+                                    </div>
+                                    <div class="hdp-vbar-lbl"><t t-esc="bar.label"/></div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Chart 5: Tickets Resolved Over Time -->
+                    <div class="hdp-panel">
+                        <div class="hdp-panel-head">
+                            <h3 class="hdp-panel-title">
+                                <i class="fa fa-check-square-o text-success" title="Resolved Trend"/>Tickets Resolved Over Time
+                            </h3>
+                        </div>
+                        <div class="hdp-vchart">
+                            <t t-foreach="resolvedTimeline" t-as="bar" t-key="bar_index">
+                                <div class="hdp-vbar-col" t-att-title="bar.label + ': ' + bar.count + ' resolved'">
+                                    <div class="hdp-vbar-val"><t t-esc="bar.count"/></div>
+                                    <div class="hdp-vbar-track">
+                                        <div class="hdp-vbar-fill" t-attf-style="height: #{bar.pct}%; background-color: #16A34A;"/>
+                                    </div>
+                                    <div class="hdp-vbar-lbl"><t t-esc="bar.label"/></div>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Row 3 Tables: Urgent / SLA Attention Queue & Agent Workload Leaderboard -->
+                <section class="hdp-chart-grid-2">
+                    <!-- Urgent / Overdue / SLA Warning Queue -->
+                    <div class="hdp-panel">
+                        <div class="hdp-panel-head">
+                            <h3 class="hdp-panel-title">
+                                <i class="fa fa-bell text-danger" title="Attention Queue"/>Priority &amp; SLA Attention Queue
+                            </h3>
+                        </div>
+                        <t t-if="!state.data.attention.length">
+                            <div class="text-muted small py-4 text-center">
+                                No urgent, overdue, or SLA-at-risk tickets right now.
+                            </div>
+                        </t>
+                        <table t-else="" class="hdp-table">
+                            <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Subject</th>
+                                    <th>Customer</th>
+                                    <th>Priority</th>
+                                    <th>SLA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.data.attention" t-as="t" t-key="t.id">
+                                    <tr t-on-click="() => this.openTicket(t.id)">
+                                        <td class="fw-bold text-primary"><t t-esc="t.name"/></td>
+                                        <td><t t-esc="t.subject"/></td>
+                                        <td class="text-muted"><t t-esc="t.customer"/></td>
+                                        <td>
+                                            <span t-attf-class="hdp-prio-badge hdp-p-#{t.priority}">
+                                                <t t-esc="t.priority_label"/>
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span t-if="t.sla_status === 'breached'" class="badge text-bg-danger">Breached</span>
+                                            <span t-elif="t.sla_status === 'warning'" class="badge text-bg-warning">Warning</span>
+                                            <span t-elif="t.is_overdue" class="badge text-bg-danger">Overdue</span>
+                                            <span t-else="" class="badge text-bg-success">On Track</span>
+                                        </td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Agent Workload & Resolution Leaderboard -->
+                    <div class="hdp-panel">
+                        <div class="hdp-panel-head">
+                            <h3 class="hdp-panel-title">
+                                <i class="fa fa-id-badge text-primary" title="Agents"/>Agent Workload &amp; Performance
+                            </h3>
+                        </div>
+                        <t t-if="!state.data.agents.length">
+                            <div class="text-muted small py-4 text-center">No agent assignments recorded yet</div>
+                        </t>
+                        <table t-else="" class="hdp-table">
+                            <thead>
+                                <tr>
+                                    <th>Agent</th>
+                                    <th>Assigned</th>
+                                    <th>Active Open</th>
+                                    <th>Resolved</th>
+                                    <th>Avg Resolution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="state.data.agents" t-as="ag" t-key="ag.id">
+                                    <tr t-on-click="() => this.openFilteredTickets('user_id', ag.id, ag.name)">
+                                        <td class="fw-semibold"><t t-esc="ag.name"/></td>
+                                        <td><t t-esc="ag.assigned"/></td>
+                                        <td><span class="badge text-bg-primary"><t t-esc="ag.open"/></span></td>
+                                        <td><span class="badge text-bg-success"><t t-esc="ag.resolved"/></span></td>
+                                        <td><t t-esc="ag.avg_hours"/> h</td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </t>
+        </div>
+    </t>
+</templates>

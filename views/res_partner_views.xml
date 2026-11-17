@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_form_helpdeskpro" model="ir.ui.view">
+        <field name="name">res.partner.form.helpdeskpro</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button class="oe_stat_button" type="object" name="action_view_helpdesk_tickets"
+                        icon="fa-life-ring" groups="helpdeskpro.group_helpdesk_user">
+                    <div class="o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="helpdesk_open_ticket_count"/> / <field name="helpdesk_ticket_count"/>
+                        </span>
+                        <span class="o_stat_text">Open / Total Tickets</span>
+                    </div>
+                </button>
+            </div>
+            <notebook position="inside">
+                <page string="Support Tickets" name="helpdesk_tickets" groups="helpdeskpro.group_helpdesk_user">
+                    <group>
+                        <group>
+                            <field name="helpdesk_ticket_count" readonly="1"/>
+                            <field name="helpdesk_open_ticket_count" readonly="1"/>
+                            <field name="helpdesk_resolved_ticket_count" readonly="1"/>
+                        </group>
+                    </group>
+                    <field name="helpdesk_ticket_ids" context="{'default_partner_id': id}">
+                        <list>
+                            <field name="name"/>
+                            <field name="subject"/>
+                            <field name="team_id"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="priority" widget="badge"/>
+                            <field name="sla_status" widget="badge"/>
+                            <field name="create_date"/>
+                            <field name="state" widget="badge"/>
+                        </list>
+                    </field>
+                </page>
+            </notebook>
+        </field>
+    </record>
+
+    <record id="action_helpdesk_customers" model="ir.actions.act_window">
+        <field name="name">Customers</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'res_partner_search_mode': 'customer'}</field>
+    </record>
+</odoo>

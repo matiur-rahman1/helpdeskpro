@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_helpdesk_category_list" model="ir.ui.view">
+        <field name="name">helpdesk.category.list</field>
+        <field name="model">helpdesk.category</field>
+        <field name="arch" type="xml">
+            <list string="Ticket Categories">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="default_team_id"/>
+                <field name="ai_keywords" optional="show"/>
+                <field name="ticket_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_helpdesk_category_form" model="ir.ui.view">
+        <field name="name">helpdesk.category.form</field>
+        <field name="model">helpdesk.category</field>
+        <field name="arch" type="xml">
+            <form string="Ticket Category">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_view_tickets" icon="fa-ticket">
+                            <field string="Tickets" name="ticket_count" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Technical Support"/></h1>
+                    </div>
+                    <group>
+                        <group string="Routing &amp; Classification">
+                            <field name="code" placeholder="TECH"/>
+                            <field name="sequence"/>
+                            <field name="default_team_id"/>
+                        </group>
+                        <group string="Smart Auto-Classification">
+                            <field name="ai_keywords" placeholder="server, api, timeout, network"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1" placeholder="Guidelines on when to use this category..."/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_helpdesk_category" model="ir.actions.act_window">
+        <field name="name">Ticket Categories</field>
+        <field name="res_model">helpdesk.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="view_helpdesk_tag_list" model="ir.ui.view">
+        <field name="name">helpdesk.tag.list</field>
+        <field name="model">helpdesk.tag</field>
+        <field name="arch" type="xml">
+            <list string="Ticket Tags" editable="bottom">
+                <field name="name"/>
+                <field name="color" widget="color_picker"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_helpdesk_tag" model="ir.actions.act_window">
+        <field name="name">Ticket Tags</field>
+        <field name="res_model">helpdesk.tag</field>
+        <field name="view_mode">list</field>
+    </record>
+</odoo>

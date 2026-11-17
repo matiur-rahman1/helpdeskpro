@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- 1. Ticket Summary & Resolution PDF Template -->
+    <template id="report_helpdesk_ticket_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family: Arial, Helvetica, sans-serif; color: #1E293B; font-size: 13px;">
+                        <div style="background-color: #1E293B; color: #FFFFFF; padding: 16px 20px; border-radius: 6px; margin-bottom: 18px;">
+                            <div style="font-size: 12px; color: #94A3B8; text-transform: uppercase; letter-spacing: 0.06em;">
+                                HelpDeskPro Support Ticket Report
+                            </div>
+                            <h2 style="margin: 4px 0 0; color: #FFFFFF; font-size: 20px;">
+                                [<t t-out="o.name"/>] <t t-out="o.subject"/>
+                            </h2>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 18px;">
+                            <tr>
+                                <td style="width: 50%; vertical-align: top; padding: 10px 14px; background-color: #F8FAFC; border: 1px solid #E2E8F0;">
+                                    <h4 style="margin: 0 0 8px; color: #2563EB; font-size: 13px; text-transform: uppercase;">Customer Details</h4>
+                                    <div><strong>Customer:</strong> <t t-out="o.partner_id.name or 'N/A'"/></div>
+                                    <div><strong>Email:</strong> <t t-out="o.customer_email or 'N/A'"/></div>
+                                    <div><strong>Phone:</strong> <t t-out="o.customer_phone or 'N/A'"/></div>
+                                    <div><strong>Channel / Source:</strong> <t t-out="dict(o._fields['source'].selection).get(o.source, '')"/></div>
+                                </td>
+                                <td style="width: 50%; vertical-align: top; padding: 10px 14px; background-color: #F8FAFC; border: 1px solid #E2E8F0;">
+                                    <h4 style="margin: 0 0 8px; color: #2563EB; font-size: 13px; text-transform: uppercase;">Assignment &amp; SLA</h4>
+                                    <div><strong>Support Team:</strong> <t t-out="o.team_id.name or 'Unassigned'"/></div>
+                                    <div><strong>Assigned Agent:</strong> <t t-out="o.user_id.name or 'Unassigned'"/></div>
+                                    <div><strong>Priority:</strong> <t t-out="dict(o._fields['priority'].selection).get(o.priority, '')"/></div>
+                                    <div><strong>Status:</strong> <t t-out="dict(o._fields['state'].selection).get(o.state, '')"/></div>
+                                    <div><strong>SLA Status:</strong> <t t-out="dict(o._fields['sla_status'].selection).get(o.sla_status, '')"/></div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 18px; border: 1px solid #E2E8F0;">
+                            <tr style="background-color: #F1F5F9;">
+                                <th style="padding: 8px 10px; text-align: left; border: 1px solid #E2E8F0;">Created Date</th>
+                                <th style="padding: 8px 10px; text-align: left; border: 1px solid #E2E8F0;">First Response</th>
+                                <th style="padding: 8px 10px; text-align: left; border: 1px solid #E2E8F0;">SLA Deadline</th>
+                                <th style="padding: 8px 10px; text-align: left; border: 1px solid #E2E8F0;">Resolved Date</th>
+                                <th style="padding: 8px 10px; text-align: left; border: 1px solid #E2E8F0;">Resolution Hours</th>
+                            </tr>
+                            <tr>
+                                <td style="padding: 8px 10px; border: 1px solid #E2E8F0;"><span t-field="o.create_date"/></td>
+                                <td style="padding: 8px 10px; border: 1px solid #E2E8F0;"><span t-field="o.first_response_date"/></td>
+                                <td style="padding: 8px 10px; border: 1px solid #E2E8F0;"><span t-field="o.sla_deadline"/></td>
+                                <td style="padding: 8px 10px; border: 1px solid #E2E8F0;"><span t-field="o.resolution_date"/></td>
+                                <td style="padding: 8px 10px; border: 1px solid #E2E8F0;"><t t-out="o.resolution_hours"/> h</td>
+                            </tr>
+                        </table>
+
+                        <div style="margin-bottom: 18px;">
+                            <h4 style="color: #1E293B; border-bottom: 2px solid #E2E8F0; padding-bottom: 4px;">Issue Description</h4>
+                            <div style="padding: 10px; background-color: #FFFFFF; border: 1px solid #E2E8F0;">
+                                <t t-out="o.description or 'No description provided.'"/>
+                            </div>
+                        </div>
+
+                        <div t-if="o.resolution_summary" style="margin-bottom: 18px;">
+                            <h4 style="color: #16A34A; border-bottom: 2px solid #16A34A; padding-bottom: 4px;">Resolution Summary</h4>
+                            <div style="padding: 12px; background-color: #F0FDF4; border: 1px solid #BBF7D0; white-space: pre-line;">
+                                <t t-out="o.resolution_summary"/>
+                            </div>
+                        </div>
+
+                        <div t-if="o.csat_rating" style="margin-top: 16px; padding: 10px 14px; background-color: #FEFCE8; border: 1px solid #FEF08A;">
+                            <strong>Customer Satisfaction Rating:</strong>
+                            <t t-out="dict(o._fields['csat_rating'].selection).get(o.csat_rating)"/>
+                            <t t-if="o.csat_comment"> — "<t t-out="o.csat_comment"/>"</t>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <!-- 2. Team Performance & SLA Compliance PDF Template -->
+    <template id="report_helpdesk_team_document">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="team">
+                <t t-call="web.external_layout">
+                    <div class="page" style="font-family: Arial, Helvetica, sans-serif; color: #1E293B; font-size: 13px;">
+                        <div style="background-color: #1E293B; color: #FFFFFF; padding: 16px 20px; border-radius: 6px; margin-bottom: 18px;">
+                            <div style="font-size: 12px; color: #94A3B8; text-transform: uppercase;">HelpDeskPro Team Performance &amp; SLA Report</div>
+                            <h2 style="margin: 4px 0 0; color: #FFFFFF; font-size: 20px;"><t t-out="team.name"/></h2>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; text-align: center;">
+                            <tr style="background-color: #F8FAFC;">
+                                <td style="padding: 12px; border: 1px solid #E2E8F0;">
+                                    <div style="font-size: 20px; font-weight: bold; color: #1E293B;"><t t-out="team.ticket_count"/></div>
+                                    <div style="font-size: 11px; color: #64748B;">Total Tickets</div>
+                                </td>
+                                <td style="padding: 12px; border: 1px solid #E2E8F0;">
+                                    <div style="font-size: 20px; font-weight: bold; color: #2563EB;"><t t-out="team.open_ticket_count"/></div>
+                                    <div style="font-size: 11px; color: #64748B;">Active Open</div>
+                                </td>
+                                <td style="padding: 12px; border: 1px solid #E2E8F0;">
+                                    <div style="font-size: 20px; font-weight: bold; color: #16A34A;"><t t-out="team.resolved_ticket_count"/></div>
+                                    <div style="font-size: 11px; color: #64748B;">Resolved</div>
+                                </td>
+                                <td style="padding: 12px; border: 1px solid #E2E8F0;">
+                                    <div style="font-size: 20px; font-weight: bold; color: #16A34A;"><t t-out="team.sla_compliance_rate"/>%</div>
+                                    <div style="font-size: 11px; color: #64748B;">SLA Compliance</div>
+                                </td>
+                                <td style="padding: 12px; border: 1px solid #E2E8F0;">
+                                    <div style="font-size: 20px; font-weight: bold; color: #1E293B;"><t t-out="team.avg_resolution_hours"/>h</div>
+                                    <div style="font-size: 11px; color: #64748B;">Avg Resolution</div>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <h4 style="color: #1E293B; border-bottom: 2px solid #E2E8F0; padding-bottom: 4px;">Recent Team Tickets</h4>
+                        <table style="width: 100%; border-collapse: collapse; border: 1px solid #E2E8F0;">
+                            <thead>
+                                <tr style="background-color: #F1F5F9;">
+                                    <th style="padding: 8px; border: 1px solid #E2E8F0; text-align: left;">Ref</th>
+                                    <th style="padding: 8px; border: 1px solid #E2E8F0; text-align: left;">Subject</th>
+                                    <th style="padding: 8px; border: 1px solid #E2E8F0; text-align: left;">Customer</th>
+                                    <th style="padding: 8px; border: 1px solid #E2E8F0; text-align: left;">Agent</th>
+                                    <th style="padding: 8px; border: 1px solid #E2E8F0; text-align: left;">Priority</th>
+                                    <th style="padding: 8px; border: 1px solid #E2E8F0; text-align: left;">SLA</th>
+                                    <th style="padding: 8px; border: 1px solid #E2E8F0; text-align: left;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="team.ticket_ids[:25]" t-as="tk">
+                                    <tr>
+                                        <td style="padding: 7px 8px; border: 1px solid #E2E8F0; font-weight: bold;"><t t-out="tk.name"/></td>
+                                        <td style="padding: 7px 8px; border: 1px solid #E2E8F0;"><t t-out="tk.subject"/></td>
+                                        <td style="padding: 7px 8px; border: 1px solid #E2E8F0;"><t t-out="tk.partner_id.name or tk.customer_email or '-'"/></td>
+                                        <td style="padding: 7px 8px; border: 1px solid #E2E8F0;"><t t-out="tk.user_id.name or 'Unassigned'"/></td>
+                                        <td style="padding: 7px 8px; border: 1px solid #E2E8F0;"><t t-out="dict(tk._fields['priority'].selection).get(tk.priority, '')"/></td>
+                                        <td style="padding: 7px 8px; border: 1px solid #E2E8F0;"><t t-out="dict(tk._fields['sla_status'].selection).get(tk.sla_status, '')"/></td>
+                                        <td style="padding: 7px 8px; border: 1px solid #E2E8F0;"><t t-out="dict(tk._fields['state'].selection).get(tk.state, '')"/></td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

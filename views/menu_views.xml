@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root App Menu -->
+    <menuitem id="menu_helpdeskpro_root"
+              name="HelpDeskPro"
+              sequence="15"
+              action="action_helpdeskpro_dashboard"
+              groups="helpdeskpro.group_helpdesk_user"/>
+
+    <!-- 1. Dashboard -->
+    <menuitem id="menu_helpdeskpro_dashboard"
+              name="Dashboard"
+              parent="menu_helpdeskpro_root"
+              action="action_helpdeskpro_dashboard"
+              sequence="1"/>
+
+    <!-- 2. Tickets -->
+    <menuitem id="menu_helpdeskpro_tickets_root"
+              name="Tickets"
+              parent="menu_helpdeskpro_root"
+              sequence="10"/>
+
+    <menuitem id="menu_helpdeskpro_tickets_my"
+              name="My Tickets"
+              parent="menu_helpdeskpro_tickets_root"
+              action="action_helpdesk_ticket_my"
+              sequence="10"/>
+
+    <menuitem id="menu_helpdeskpro_tickets_all"
+              name="All Tickets"
+              parent="menu_helpdeskpro_tickets_root"
+              action="action_helpdesk_ticket_all"
+              sequence="20"/>
+
+    <menuitem id="menu_helpdeskpro_tickets_unassigned"
+              name="Unassigned Tickets"
+              parent="menu_helpdeskpro_tickets_root"
+              action="action_helpdesk_ticket_unassigned"
+              sequence="30"
+              groups="helpdeskpro.group_helpdesk_agent"/>
+
+    <menuitem id="menu_helpdeskpro_tickets_overdue"
+              name="Overdue &amp; Breached"
+              parent="menu_helpdeskpro_tickets_root"
+              action="action_helpdesk_ticket_overdue"
+              sequence="40"
+              groups="helpdeskpro.group_helpdesk_agent"/>
+
+    <!-- 3. Customers & Teams -->
+    <menuitem id="menu_helpdeskpro_operations_root"
+              name="Teams &amp; Customers"
+              parent="menu_helpdeskpro_root"
+              sequence="20"/>
+
+    <menuitem id="menu_helpdeskpro_teams"
+              name="Support Teams"
+              parent="menu_helpdeskpro_operations_root"
+              action="action_helpdesk_team"
+              sequence="10"/>
+
+    <menuitem id="menu_helpdeskpro_customers"
+              name="Customers"
+              parent="menu_helpdeskpro_operations_root"
+              action="action_helpdesk_customers"
+              sequence="20"/>
+
+    <!-- 4. Knowledge Base -->
+    <menuitem id="menu_helpdeskpro_kb_root"
+              name="Knowledge Base"
+              parent="menu_helpdeskpro_root"
+              sequence="30"/>
+
+    <menuitem id="menu_helpdeskpro_kb_articles"
+              name="Knowledge Articles"
+              parent="menu_helpdeskpro_kb_root"
+              action="action_helpdesk_kb_article"
+              sequence="10"/>
+
+    <menuitem id="menu_helpdeskpro_kb_categories"
+              name="Article Categories"
+              parent="menu_helpdeskpro_kb_root"
+              action="action_helpdesk_kb_category"
+              sequence="20"
+              groups="helpdeskpro.group_helpdesk_agent"/>
+
+    <!-- 5. Reports & Analytics -->
+    <menuitem id="menu_helpdeskpro_reports_root"
+              name="Reports &amp; Analytics"
+              parent="menu_helpdeskpro_root"
+              sequence="40"
+              groups="helpdeskpro.group_helpdesk_leader"/>
+
+    <menuitem id="menu_report_ticket_summary"
+              name="Ticket Summary &amp; Resolution"
+              parent="menu_helpdeskpro_reports_root"
+              action="action_report_ticket_summary_analysis"
+              sequence="10"/>
+
+    <menuitem id="menu_report_agent_performance"
+              name="Agent Performance"
+              parent="menu_helpdeskpro_reports_root"
+              action="action_report_agent_performance"
+              sequence="20"/>
+
+    <menuitem id="menu_report_team_performance"
+              name="Team Performance"
+              parent="menu_helpdeskpro_reports_root"
+              action="action_report_team_performance"
+              sequence="30"/>
+
+    <menuitem id="menu_report_sla_compliance"
+              name="SLA Compliance"
+              parent="menu_helpdeskpro_reports_root"
+              action="action_report_sla_compliance"
+              sequence="40"/>
+
+    <menuitem id="menu_report_priority_csat"
+              name="Priority &amp; CSAT Analytics"
+              parent="menu_helpdeskpro_reports_root"
+              action="action_report_priority_csat"
+              sequence="50"/>
+
+    <menuitem id="menu_report_customer_history"
+              name="Customer Ticket History"
+              parent="menu_helpdeskpro_reports_root"
+              action="action_report_customer_history"
+              sequence="60"/>
+
+    <!-- 6. Configuration -->
+    <menuitem id="menu_helpdeskpro_config_root"
+              name="Configuration"
+              parent="menu_helpdeskpro_root"
+              sequence="90"
+              groups="helpdeskpro.group_helpdesk_manager"/>
+
+    <menuitem id="menu_helpdeskpro_config_sla"
+              name="SLA Policies"
+              parent="menu_helpdeskpro_config_root"
+              action="action_helpdesk_sla"
+              sequence="10"/>
+
+    <menuitem id="menu_helpdeskpro_config_categories"
+              name="Ticket Categories"
+              parent="menu_helpdeskpro_config_root"
+              action="action_helpdesk_category"
+              sequence="20"/>
+
+    <menuitem id="menu_helpdeskpro_config_tags"
+              name="Ticket Tags"
+              parent="menu_helpdeskpro_config_root"
+              action="action_helpdesk_tag"
+              sequence="30"/>
+</odoo>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="module_category_helpdeskpro" model="ir.module.category">
+        <field name="name">HelpDeskPro</field>
+        <field name="description">Customer Support, Ticketing, SLA &amp; Knowledge Base Access Levels</field>
+        <field name="sequence">18</field>
+    </record>
+
+    <!-- 1. HelpDesk User -->
+    <record id="group_helpdesk_user" model="res.groups">
+        <field name="name">1. HelpDesk User</field>
+        <field name="category_id" ref="module_category_helpdeskpro"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        <field name="comment">Can view permitted tickets and submit internal support requests.</field>
+    </record>
+
+    <!-- 2. HelpDesk Agent -->
+    <record id="group_helpdesk_agent" model="res.groups">
+        <field name="name">2. HelpDesk Agent</field>
+        <field name="category_id" ref="module_category_helpdeskpro"/>
+        <field name="implied_ids" eval="[(4, ref('group_helpdesk_user'))]"/>
+        <field name="comment">Can work on assigned and team tickets, communicate with customers, and manage activities.</field>
+    </record>
+
+    <!-- 3. HelpDesk Team Leader -->
+    <record id="group_helpdesk_leader" model="res.groups">
+        <field name="name">3. HelpDesk Team Leader</field>
+        <field name="category_id" ref="module_category_helpdeskpro"/>
+        <field name="implied_ids" eval="[(4, ref('group_helpdesk_agent'))]"/>
+        <field name="comment">Can view all team tickets, assign tickets to agents, and monitor team performance.</field>
+    </record>
+
+    <!-- 4. HelpDesk Manager -->
+    <record id="group_helpdesk_manager" model="res.groups">
+        <field name="name">4. HelpDesk Manager</field>
+        <field name="category_id" ref="module_category_helpdeskpro"/>
+        <field name="implied_ids" eval="[(4, ref('group_helpdesk_leader'))]"/>
+        <field name="comment">Can manage all support tickets across teams, manage SLA policies, and access management reports.</field>
+    </record>
+
+    <!-- 5. HelpDesk Administrator -->
+    <record id="group_helpdesk_admin" model="res.groups">
+        <field name="name">5. HelpDesk Administrator</field>
+        <field name="category_id" ref="module_category_helpdeskpro"/>
+        <field name="implied_ids" eval="[(4, ref('group_helpdesk_manager'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        <field name="comment">Full configuration and system administration access for HelpDeskPro.</field>
+    </record>
+</odoo>

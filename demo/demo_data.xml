@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Sample Demo Tickets so the Dashboard, Kanban & Analytics are populated immediately -->
+        <record id="demo_customer_acme" model="res.partner">
+            <field name="name">Acme Global Technologies</field>
+            <field name="email">ops@acmeglobal.example.com</field>
+            <field name="phone">+1-555-019-2831</field>
+        </record>
+
+        <record id="demo_customer_nexus" model="res.partner">
+            <field name="name">Nexus FinTech Solutions</field>
+            <field name="email">billing@nexusfintech.example.com</field>
+            <field name="phone">+1-555-014-8820</field>
+        </record>
+
+        <record id="demo_ticket_1" model="helpdesk.ticket">
+            <field name="subject">Production REST API returning 504 Gateway Timeout on bulk webhook sync</field>
+            <field name="partner_id" ref="demo_customer_acme"/>
+            <field name="team_id" ref="team_technical_support"/>
+            <field name="category_id" ref="cat_technical_support"/>
+            <field name="priority">3</field>
+            <field name="ticket_type">incident</field>
+            <field name="source">portal</field>
+            <field name="state">in_progress</field>
+            <field name="tag_ids" eval="[(4, ref('tag_vip')), (4, ref('tag_production'))]"/>
+            <field name="description">&lt;p&gt;Our webhook listener started timing out when syncing batches over 500 records.&lt;/p&gt;</field>
+        </record>
+
+        <record id="demo_ticket_2" model="helpdesk.ticket">
+            <field name="subject">Duplicate VAT charge on October Enterprise Subscription Invoice</field>
+            <field name="partner_id" ref="demo_customer_nexus"/>
+            <field name="team_id" ref="team_billing_accounts"/>
+            <field name="category_id" ref="cat_billing"/>
+            <field name="priority">2</field>
+            <field name="ticket_type">question</field>
+            <field name="source">email</field>
+            <field name="state">resolved</field>
+            <field name="resolution_summary">Issued credit note CN-2026-089 and updated tax exemption profile on customer account.</field>
+            <field name="csat_rating">5</field>
+            <field name="csat_comment">Super fast resolution by the billing team!</field>
+        </record>
+
+        <record id="demo_ticket_3" model="helpdesk.ticket">
+            <field name="subject">SSO SAML 2.0 login redirect loop for new department users</field>
+            <field name="partner_id" ref="demo_customer_acme"/>
+            <field name="team_id" ref="team_billing_accounts"/>
+            <field name="category_id" ref="cat_account_access"/>
+            <field name="priority">2</field>
+            <field name="ticket_type">problem</field>
+            <field name="source">portal</field>
+            <field name="state">open</field>
+            <field name="tag_ids" eval="[(4, ref('tag_security'))]"/>
+        </record>
+    </data>
+</odoo>
