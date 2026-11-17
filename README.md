@@ -44,15 +44,26 @@ Designed with an enterprise Navy & Blue aesthetic (`#1E293B` / `#2563EB`), HelpD
 
 ## 3. Screenshots
 
-Genuine screenshots of the running Odoo 18 application are stored in the [`screenshots/`](screenshots/) directory:
+### 3.1 Executive HelpDesk Dashboard
+![HelpDesk Dashboard](screenshots/dashboard.png)
 
-- `![HelpDesk Dashboard](screenshots/dashboard.png)`
-- `![Ticket Kanban](screenshots/ticket_kanban.png)`
-- `![Ticket Form](screenshots/ticket_form.png)`
-- `![Team Management](screenshots/teams.png)`
-- `![SLA Configuration](screenshots/sla_policies.png)`
-- `![Customer Portal](screenshots/customer_portal.png)`
-- `![Reports and Analytics](screenshots/analytics.png)`
+### 3.2 Ticket Kanban Board
+![Ticket Kanban](screenshots/ticket_kanban.png)
+
+### 3.3 Ticket Form & SLA Tracking
+![Ticket Form](screenshots/ticket_form.png)
+
+### 3.4 Support Team Management
+![Team Management](screenshots/teams.png)
+
+### 3.5 SLA Policy Configuration
+![SLA Configuration](screenshots/sla_policies.png)
+
+### 3.6 Customer Support Portal (`/my/tickets`)
+![Customer Portal](screenshots/customer_portal.png)
+
+### 3.7 Reports & SLA Compliance Analytics
+![Reports and Analytics](screenshots/analytics.png)
 
 ---
 
