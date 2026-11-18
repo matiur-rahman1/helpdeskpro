@@ -44,17 +44,35 @@ Designed with an enterprise Navy & Blue aesthetic (`#1E293B` / `#2563EB`), HelpD
 
 ## 3. Screenshots
 
-Real screenshots of the running app have not been added yet. To capture them after installing the module, open each screen below in Odoo 18 and save the images into a `screenshots/` folder:
+> Real captures of the running Odoo 18 app (headless Chrome, 1440×900). Tickets, customers and ratings shown include **sample data** created only for the captures.
 
-- **HelpDeskPro → Dashboard**
-- **Tickets → All Tickets** (Kanban view)
-- A ticket form
-- **Teams & Customers → Support Teams**
-- **Configuration → SLA Policies**
-- The customer portal at `/my/tickets`
-- **Reports & Analytics**
+### 3.1 Executive HelpDesk Dashboard
+![HelpDesk Dashboard](screenshots/dashboard.png)
 
-Then reference them here, for example `![Dashboard](screenshots/dashboard.png)`.
+### 3.2 Ticket Kanban Board
+![Ticket Kanban](screenshots/ticket_kanban.png)
+
+### 3.3 Ticket Form: SLA tracking, duplicate detection and merge
+![Ticket Form](screenshots/ticket_form.png)
+
+### 3.4 Support Team Management
+![Team Management](screenshots/teams.png)
+
+### 3.5 SLA Policy Configuration
+![SLA Configuration](screenshots/sla_policies.png)
+
+### 3.6 Reports and Analytics (Team Performance)
+![Reports and Analytics](screenshots/analytics.png)
+
+### 3.7 Knowledge Base (backend articles)
+![Knowledge articles](screenshots/knowledge_base_admin.png)
+
+### 3.8 Customer Portal: my tickets and ticket detail
+![Customer Portal](screenshots/customer_portal.png)
+![Portal ticket detail](screenshots/customer_portal_ticket.png)
+
+### 3.9 Knowledge Base and FAQ website page (`/helpdesk/knowledge`)
+![Knowledge Base website](screenshots/knowledge_base_portal.png)
 
 ---
 
