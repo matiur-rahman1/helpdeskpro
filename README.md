@@ -44,26 +44,17 @@ Designed with an enterprise Navy & Blue aesthetic (`#1E293B` / `#2563EB`), HelpD
 
 ## 3. Screenshots
 
-### 3.1 Executive HelpDesk Dashboard
-![HelpDesk Dashboard](screenshots/dashboard.png)
+Real screenshots of the running app have not been added yet. To capture them after installing the module, open each screen below in Odoo 18 and save the images into a `screenshots/` folder:
 
-### 3.2 Ticket Kanban Board
-![Ticket Kanban](screenshots/ticket_kanban.png)
+- **HelpDeskPro → Dashboard**
+- **Tickets → All Tickets** (Kanban view)
+- A ticket form
+- **Teams & Customers → Support Teams**
+- **Configuration → SLA Policies**
+- The customer portal at `/my/tickets`
+- **Reports & Analytics**
 
-### 3.3 Ticket Form & SLA Tracking
-![Ticket Form](screenshots/ticket_form.png)
-
-### 3.4 Support Team Management
-![Team Management](screenshots/teams.png)
-
-### 3.5 SLA Policy Configuration
-![SLA Configuration](screenshots/sla_policies.png)
-
-### 3.6 Customer Support Portal (`/my/tickets`)
-![Customer Portal](screenshots/customer_portal.png)
-
-### 3.7 Reports & SLA Compliance Analytics
-![Reports and Analytics](screenshots/analytics.png)
+Then reference them here, for example `![Dashboard](screenshots/dashboard.png)`.
 
 ---
 
